@@ -3,7 +3,7 @@
 #pragma bss-name(push, "XRAM")
 // extra RAM at $6000-$7fff
 
-#define WRAM_VERSION 0x0001
+#define WRAM_VERSION 0x0002
 unsigned int wram_start;
 
 unsigned char grid[25][25];

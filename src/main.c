@@ -20,6 +20,14 @@
 
 #pragma bss-name(push, "ZEROPAGE")
 
+typedef enum
+  {
+   CellEmpty,
+   CellFilled,
+   CellQuestion,
+   CellCrossed
+  } cell_state_t;
+
 // GLOBAL VARIABLES
 #ifdef DEBUG
 unsigned char gray_line_enabled;
@@ -113,8 +121,8 @@ void draw_sprites (void) {
 }
 
 void refresh_hud (void) {
-  multi_vram_buffer_horz(cols[cursor_column], 10, NTADR_A(7, 1));
-  multi_vram_buffer_vert(rows[cursor_row], 10, NTADR_A(2, 6));
+  multi_vram_buffer_horz(rows[cursor_row], 10, NTADR_A(7, 1));
+  multi_vram_buffer_vert(cols[cursor_column], 10, NTADR_A(2, 6));
 }
 
 void draw_screen (void) {
@@ -152,7 +160,9 @@ void refresh_cell (void) {
   case 0: temp = 0x60; break;
   case 1: temp = 0x61; break;
   case 2: temp = 0x62; break;
+  case 3: temp = 0x62; break;
   }
+
   one_vram_buffer(temp, NTADR_A(4 + cursor_column, 3 + cursor_row));
 }
 
@@ -182,28 +192,34 @@ void handle_input() {
   }
   if (pad1_new & PAD_A) {
     switch(grid[cursor_row][cursor_column]) {
-    case 0:
-      grid[cursor_row][cursor_column] = 1;
+    case CellEmpty:
+      grid[cursor_row][cursor_column] = CellFilled;
       break;
-    case 1:
-      grid[cursor_row][cursor_column] = 0;
+    case CellFilled:
+      grid[cursor_row][cursor_column] = CellEmpty;
       break;
-    case 2:
-      grid[cursor_row][cursor_column] = 0;
+    case CellQuestion:
+      grid[cursor_row][cursor_column] = CellEmpty;
+      break;
+    case CellCrossed:
+      grid[cursor_row][cursor_column] = CellCrossed;
       break;
     }
     refresh_cell();
   }
   if (pad1_new & PAD_B) {
     switch(grid[cursor_row][cursor_column]) {
-    case 0:
-      grid[cursor_row][cursor_column] = 2;
+    case CellEmpty:
+      grid[cursor_row][cursor_column] = CellCrossed;
       break;
-    case 1:
-      grid[cursor_row][cursor_column] = 1;
+    case CellFilled:
+      grid[cursor_row][cursor_column] = CellFilled;
       break;
-    case 2:
-      grid[cursor_row][cursor_column] = 0;
+    case CellQuestion:
+      grid[cursor_row][cursor_column] = CellEmpty;
+      break;
+    case CellCrossed:
+      grid[cursor_row][cursor_column] = CellQuestion;
       break;
     }
     refresh_cell();
