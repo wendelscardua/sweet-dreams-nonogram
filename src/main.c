@@ -39,6 +39,7 @@ unsigned char cursor_row, cursor_column;
 
 void draw_screen();
 void draw_sprites();
+void refresh_cell();
 void refresh_hud();
 void handle_input();
 
@@ -146,6 +147,15 @@ void draw_screen (void) {
   pal_fade_to(0, 4);
 }
 
+void refresh_cell (void) {
+  switch(grid[cursor_row][cursor_column]) {
+  case 0: temp = 0x60; break;
+  case 1: temp = 0x61; break;
+  case 2: temp = 0x62; break;
+  }
+  one_vram_buffer(temp, NTADR_A(4 + cursor_column, 3 + cursor_row));
+}
+
 void handle_input() {
   pad_poll(0);
   pad1_new = get_pad_new(0);
@@ -169,5 +179,33 @@ void handle_input() {
     if (cursor_column == 24) cursor_column = 0;
     else cursor_column++;
     refresh_hud();
+  }
+  if (pad1_new & PAD_A) {
+    switch(grid[cursor_row][cursor_column]) {
+    case 0:
+      grid[cursor_row][cursor_column] = 1;
+      break;
+    case 1:
+      grid[cursor_row][cursor_column] = 0;
+      break;
+    case 2:
+      grid[cursor_row][cursor_column] = 0;
+      break;
+    }
+    refresh_cell();
+  }
+  if (pad1_new & PAD_B) {
+    switch(grid[cursor_row][cursor_column]) {
+    case 0:
+      grid[cursor_row][cursor_column] = 2;
+      break;
+    case 1:
+      grid[cursor_row][cursor_column] = 1;
+      break;
+    case 2:
+      grid[cursor_row][cursor_column] = 0;
+      break;
+    }
+    refresh_cell();
   }
 }

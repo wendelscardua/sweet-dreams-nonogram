@@ -6,9 +6,7 @@
 #define WRAM_VERSION 0x0001
 unsigned int wram_start;
 
-// this one doesn't need to be saved, it's here because of space
-// TODO: optimize it away
-unsigned char unrle_buffer[1024];
+unsigned char grid[25][25];
 
 #pragma bss-name(pop)
 
