@@ -35,6 +35,7 @@ unsigned char gray_line_enabled;
 
 unsigned char cursor_row, cursor_column;
 unsigned char last_color;
+unsigned char held_time;
 
 // Game stuff
 
@@ -198,29 +199,57 @@ void refresh_cell (void) {
   one_vram_buffer(temp, NTADR_A(4 + cursor_column, 3 + cursor_row));
 }
 
+void keep_a_painting () {
+  if (a_transition(grid[cursor_row][cursor_column]) == last_color) {
+    grid[cursor_row][cursor_column] = last_color;
+    refresh_cell();
+  }
+}
+
+void keep_b_painting () {
+  if (b_transition(grid[cursor_row][cursor_column]) == last_color) {
+    grid[cursor_row][cursor_column] = last_color;
+    refresh_cell();
+  }
+}
+
+void maybe_keep_painting() {
+  if (!(pad1_new & PAD_A) && (pad1 & PAD_A)) keep_a_painting();
+  if (!(pad1_new & PAD_B) && (pad1 & PAD_B)) keep_b_painting();
+}
+
 void handle_input() {
   pad_poll(0);
+  pad1 = pad_state(0);
   pad1_new = get_pad_new(0);
 
   if (pad1_new & PAD_UP) {
+    held_time =0;
     if (cursor_row == 0) cursor_row = 24;
     else cursor_row--;
     refresh_hud();
+    maybe_keep_painting();
   }
   if (pad1_new & PAD_DOWN) {
+    held_time = 0;
     if (cursor_row == 24) cursor_row = 0;
     else cursor_row++;
     refresh_hud();
+    maybe_keep_painting();
   }
   if (pad1_new & PAD_LEFT) {
+    held_time = 0;
     if (cursor_column == 0) cursor_column = 24;
     else cursor_column--;
     refresh_hud();
+    maybe_keep_painting();
   }
   if (pad1_new & PAD_RIGHT) {
+    held_time = 0;
     if (cursor_column == 24) cursor_column = 0;
     else cursor_column++;
     refresh_hud();
+    maybe_keep_painting();
   }
   if (pad1_new & PAD_A) {
     last_color = grid[cursor_row][cursor_column] = a_transition(grid[cursor_row][cursor_column]);
