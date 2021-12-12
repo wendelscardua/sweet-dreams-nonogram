@@ -138,6 +138,21 @@ void draw_screen (void) {
   vram_adr(NTADR_A(0,0));
   vram_unrle(empty_qr_nametable);
 
+  temp = 0;
+  for (cursor_row = 0; cursor_row < 25; cursor_row++) {
+    for (cursor_column = 0; cursor_column < 25; cursor_column++) {
+      if (grid[cursor_row][cursor_column] != CellEmpty) {
+        refresh_cell();
+        temp++;
+        if (temp >= 16) {
+          flush_vram_update_nmi();
+          clear_vram_buffer();
+          temp = 0;
+        }
+      }
+    }
+  }
+
   set_scroll_x(0);
   set_scroll_y(0);
 
