@@ -35,7 +35,7 @@ unsigned char gray_line_enabled;
 
 unsigned char cursor_row, cursor_column;
 unsigned char last_color;
-unsigned char held_time;
+signed char held_time;
 
 // Game stuff
 
@@ -218,34 +218,45 @@ void maybe_keep_painting() {
   if (!(pad1_new & PAD_B) && (pad1 & PAD_B)) keep_b_painting();
 }
 
+unsigned char going(unsigned char dpad) {
+  if (pad1_new & dpad) {
+    held_time = 0;
+    return 1;
+  }
+  if (pad1 & dpad) {
+    if (held_time >= 15) {
+      held_time = 8;
+      return 1;
+    }
+    held_time++;
+  }
+  return 0;
+}
+
 void handle_input() {
   pad_poll(0);
   pad1 = pad_state(0);
   pad1_new = get_pad_new(0);
 
-  if (pad1_new & PAD_UP) {
-    held_time =0;
+  if (going(PAD_UP)) {
     if (cursor_row == 0) cursor_row = 24;
     else cursor_row--;
     refresh_hud();
     maybe_keep_painting();
   }
-  if (pad1_new & PAD_DOWN) {
-    held_time = 0;
+  if (going(PAD_DOWN)) {
     if (cursor_row == 24) cursor_row = 0;
     else cursor_row++;
     refresh_hud();
     maybe_keep_painting();
   }
-  if (pad1_new & PAD_LEFT) {
-    held_time = 0;
+  if (going(PAD_LEFT)) {
     if (cursor_column == 0) cursor_column = 24;
     else cursor_column--;
     refresh_hud();
     maybe_keep_painting();
   }
-  if (pad1_new & PAD_RIGHT) {
-    held_time = 0;
+  if (going(PAD_RIGHT)) {
     if (cursor_column == 24) cursor_column = 0;
     else cursor_column++;
     refresh_hud();
