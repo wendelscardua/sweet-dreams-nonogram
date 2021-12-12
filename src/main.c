@@ -155,13 +155,18 @@ void draw_screen (void) {
   pal_fade_to(0, 4);
 }
 
+#define IS_MUL_5(value) ((value) == 5 || (value) == 10 || (value) == 15 || (value) == 20)
+
 void refresh_cell (void) {
   switch(grid[cursor_row][cursor_column]) {
-  case 0: temp = 0x60; break;
-  case 1: temp = 0x61; break;
-  case 2: temp = 0x62; break;
-  case 3: temp = 0x62; break;
+  case CellEmpty: temp = 0x60; break;
+  case CellFilled: temp = 0x61; break;
+  case CellQuestion: temp = 0x62; break;
+  case CellCrossed: temp = 0x63; break;
   }
+
+  if (IS_MUL_5(cursor_row)) temp += 4;
+  if (IS_MUL_5(cursor_column)) temp += 8;
 
   one_vram_buffer(temp, NTADR_A(4 + cursor_column, 3 + cursor_row));
 }
