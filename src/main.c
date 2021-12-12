@@ -16,14 +16,16 @@
 #include "../assets/nametables.h"
 #include "../assets/palettes.h"
 #include "../assets/sprites.h"
+#include "../assets/qr.h"
 
 #pragma bss-name(push, "ZEROPAGE")
 
 // GLOBAL VARIABLES
-unsigned char unseeded;
 #ifdef DEBUG
 unsigned char gray_line_enabled;
 #endif
+
+unsigned char cursor_row, cursor_column;
 
 // Game stuff
 
@@ -37,6 +39,8 @@ unsigned char gray_line_enabled;
 
 void draw_screen();
 void draw_sprites();
+void refresh_hud();
+void handle_input();
 
 void main (void) {
   set_mirroring(MIRROR_HORIZONTAL);
@@ -60,11 +64,17 @@ void main (void) {
   set_vram_buffer();
   clear_vram_buffer();
 
+  pal_fade_to(4, 0);
+
   draw_screen();
+  cursor_row = cursor_column = 0;
+  refresh_hud();
 
   while (1){ // infinite loop
     ppu_wait_nmi();
     clear_vram_buffer();
+
+    handle_input();
 
     double_buffer_index = 0;
 
@@ -98,6 +108,11 @@ void main (void) {
 void draw_sprites (void) {
   oam_clear();
 
+  oam_meta_spr(0x20 + 0x08 * cursor_column, 0x18 + 0x08 * cursor_row, (const unsigned char *)cursor_sprite);
+}
+
+void refresh_hud (void) {
+  // TODO
 }
 
 void draw_screen (void) {
@@ -128,4 +143,30 @@ void draw_screen (void) {
 
   ppu_on_all();
   pal_fade_to(0, 4);
+}
+
+void handle_input() {
+  pad_poll(0);
+  pad1_new = get_pad_new(0);
+
+  if (pad1_new & PAD_UP) {
+    if (cursor_row == 0) cursor_row = 24;
+    else cursor_row--;
+    refresh_hud();
+  }
+  if (pad1_new & PAD_DOWN) {
+    if (cursor_row == 24) cursor_row = 0;
+    else cursor_row++;
+    refresh_hud();
+  }
+  if (pad1_new & PAD_LEFT) {
+    if (cursor_column == 0) cursor_column = 24;
+    else cursor_column--;
+    refresh_hud();
+  }
+  if (pad1_new & PAD_RIGHT) {
+    if (cursor_column == 24) cursor_column = 0;
+    else cursor_column++;
+    refresh_hud();
+  }
 }
