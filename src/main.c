@@ -34,6 +34,7 @@ unsigned char gray_line_enabled;
 #endif
 
 unsigned char cursor_row, cursor_column;
+unsigned char last_color;
 
 // Game stuff
 
@@ -155,6 +156,32 @@ void draw_screen (void) {
   pal_fade_to(0, 4);
 }
 
+cell_state_t a_transition(cell_state_t current_state) {
+  switch(current_state) {
+  case CellEmpty:
+    return CellFilled;
+  case CellFilled:
+    return CellEmpty;
+  case CellQuestion:
+    return CellEmpty;
+  case CellCrossed:
+    return CellCrossed;
+  }
+}
+
+cell_state_t b_transition(cell_state_t current_state) {
+  switch(current_state) {
+  case CellEmpty:
+    return CellCrossed;
+  case CellFilled:
+    return CellFilled;
+  case CellQuestion:
+    return CellEmpty;
+  case CellCrossed:
+    return CellQuestion;
+  }
+}
+
 #define IS_MUL_5(value) ((value) == 5 || (value) == 10 || (value) == 15 || (value) == 20)
 
 void refresh_cell (void) {
@@ -196,37 +223,11 @@ void handle_input() {
     refresh_hud();
   }
   if (pad1_new & PAD_A) {
-    switch(grid[cursor_row][cursor_column]) {
-    case CellEmpty:
-      grid[cursor_row][cursor_column] = CellFilled;
-      break;
-    case CellFilled:
-      grid[cursor_row][cursor_column] = CellEmpty;
-      break;
-    case CellQuestion:
-      grid[cursor_row][cursor_column] = CellEmpty;
-      break;
-    case CellCrossed:
-      grid[cursor_row][cursor_column] = CellCrossed;
-      break;
-    }
+    last_color = grid[cursor_row][cursor_column] = a_transition(grid[cursor_row][cursor_column]);
     refresh_cell();
   }
   if (pad1_new & PAD_B) {
-    switch(grid[cursor_row][cursor_column]) {
-    case CellEmpty:
-      grid[cursor_row][cursor_column] = CellCrossed;
-      break;
-    case CellFilled:
-      grid[cursor_row][cursor_column] = CellFilled;
-      break;
-    case CellQuestion:
-      grid[cursor_row][cursor_column] = CellEmpty;
-      break;
-    case CellCrossed:
-      grid[cursor_row][cursor_column] = CellQuestion;
-      break;
-    }
+    last_color = grid[cursor_row][cursor_column] = b_transition(grid[cursor_row][cursor_column]);
     refresh_cell();
   }
 }
