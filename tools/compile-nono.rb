@@ -9,7 +9,10 @@ require 'json'
 data = JSON.parse(File.read(input))
 
 File.open(asm_output, 'wb') do |asm|
-  asm.puts '.include "../src/charmap.inc"'
+  asm.puts <<~"ASM"
+    .include "../src/charmap.inc"
+    .export _rows, _cols
+  ASM
 
   data['ver'].each.with_index do |row, index|
     asm.puts %Q{row_#{index}: .byte "#{'%-10s' % row.join}"}

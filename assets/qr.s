@@ -1,4 +1,5 @@
 .include "../src/charmap.inc"
+.export _rows, _cols
 row_0: .byte "72117     "
 row_1: .byte "111111    "
 row_2: .byte "13123131  "

@@ -70,7 +70,7 @@ assets/palettes.o: assets/palettes.s assets/palettes.h \
 assets/sprites.o: assets/sprites.s assets/sprites.h
 	ca65 $< ${CA65_FLAGS}
 
-assets/qr.o: assets/qr.s assets/qr.h
+assets/qr.o: assets/qr.s assets/qr.h src/charmap.inc
 	ca65 $< ${CA65_FLAGS}
 
 assets/qr.s: tools/compile-nono.rb assets/qr.json

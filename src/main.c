@@ -112,7 +112,8 @@ void draw_sprites (void) {
 }
 
 void refresh_hud (void) {
-  // TODO
+  multi_vram_buffer_horz(cols[cursor_column], 10, NTADR_A(7, 1));
+  multi_vram_buffer_vert(rows[cursor_row], 10, NTADR_A(2, 6));
 }
 
 void draw_screen (void) {
