@@ -36,6 +36,7 @@ unsigned char gray_line_enabled;
 unsigned char cursor_row, cursor_column;
 unsigned char last_color;
 signed char held_time;
+unsigned char clean_view;
 
 // Game stuff
 
@@ -136,6 +137,7 @@ void check_row() {
     }
   }
   one_vram_buffer(0x08, NTADR_A(18, 1));
+  return;
 }
 
 void check_col() {
@@ -171,6 +173,8 @@ void draw_screen (void) {
   // draw some things
   vram_adr(NTADR_A(0,0));
   vram_unrle(empty_qr_nametable);
+
+  clean_view = 0;
 
   temp = 0;
   for (cursor_row = 0; cursor_row < 25; cursor_row++) {
@@ -248,6 +252,20 @@ void refresh_cell (void) {
   one_vram_buffer(temp, NTADR_A(4 + cursor_column, 3 + cursor_row));
 }
 
+void switch_view() {
+  if (clean_view) {
+    set_chr_mode_2(BG_MAIN_2);
+    set_chr_mode_3(BG_MAIN_3);
+    set_chr_mode_4(BG_MAIN_0);
+    set_chr_mode_5(BG_MAIN_1);
+  } else {
+    set_chr_mode_2(BG_MAIN_0);
+    set_chr_mode_3(BG_MAIN_1);
+    set_chr_mode_4(BG_MAIN_2);
+    set_chr_mode_5(BG_MAIN_3);
+  }
+}
+
 void keep_a_painting () {
   if (a_transition(grid[cursor_row][cursor_column]) == last_color) {
     grid[cursor_row][cursor_column] = last_color;
@@ -287,6 +305,10 @@ void handle_input() {
   pad1 = pad_state(0);
   pad1_new = get_pad_new(0);
 
+  if (pad1_new & PAD_START) {
+    clean_view = !clean_view;
+    switch_view();
+  }
   if (going(PAD_UP)) {
     if (cursor_row == 0) cursor_row = 24;
     else cursor_row--;
@@ -306,7 +328,7 @@ void handle_input() {
     maybe_keep_painting();
   }
   if (going(PAD_RIGHT)) {
-    if (cursor_column == 24) cursor_column = 0;
+        if (cursor_column == 24) cursor_column = 0;
     else cursor_column++;
     refresh_hud();
     maybe_keep_painting();
