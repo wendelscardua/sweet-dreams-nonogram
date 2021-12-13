@@ -1,5 +1,6 @@
 .include "../src/charmap.inc"
-.export _rows, _cols
+.segment "RODATA"
+.export _rows, _cols, _right_grid
 row_0: .byte "72117     "
 row_1: .byte "111111    "
 row_2: .byte "13123131  "
@@ -102,3 +103,5 @@ _cols:
 .word col_22
 .word col_23
 .word col_24
+_right_grid:
+.include "qr.inc"

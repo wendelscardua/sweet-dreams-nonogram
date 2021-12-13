@@ -122,9 +122,43 @@ void draw_sprites (void) {
   oam_meta_spr(0x20 + 0x08 * cursor_column, 0x18 + 0x08 * cursor_row, (const unsigned char *)cursor_sprite);
 }
 
+void check_row() {
+  for(temp_x = 0; temp_x < 25; temp_x++) {
+    if (right_grid[cursor_row][temp_x] == 1 &&
+        grid[cursor_row][temp_x] != CellFilled) {
+      one_vram_buffer(0x01, NTADR_A(18, 1));
+      return;
+    }
+    if (right_grid[cursor_row][temp_x] == 0 &&
+        grid[cursor_row][temp_x] == CellFilled) {
+      one_vram_buffer(0x01, NTADR_A(18, 1));
+      return;
+    }
+  }
+  one_vram_buffer(0x08, NTADR_A(18, 1));
+}
+
+void check_col() {
+  for(temp_y = 0; temp_y < 25; temp_y++) {
+    if (right_grid[temp_y][cursor_column] == 1 &&
+        grid[temp_y][cursor_column] != CellFilled) {
+      one_vram_buffer(0x01, NTADR_A(2, 17));
+      return;
+    }
+    if (right_grid[temp_y][cursor_column] == 0 &&
+        grid[temp_y][cursor_column] == CellFilled) {
+      one_vram_buffer(0x01, NTADR_A(2, 17));
+      return;
+    }
+  }
+  one_vram_buffer(0x08, NTADR_A(2, 17));
+}
+
 void refresh_hud (void) {
   multi_vram_buffer_horz(rows[cursor_row], 10, NTADR_A(7, 1));
   multi_vram_buffer_vert(cols[cursor_column], 10, NTADR_A(2, 6));
+  check_row();
+  check_col();
 }
 
 void draw_screen (void) {

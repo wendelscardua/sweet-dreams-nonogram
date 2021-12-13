@@ -11,7 +11,8 @@ data = JSON.parse(File.read(input))
 File.open(asm_output, 'wb') do |asm|
   asm.puts <<~"ASM"
     .include "../src/charmap.inc"
-    .export _rows, _cols
+    .segment "RODATA"
+    .export _rows, _cols, _right_grid
   ASM
 
   data['ver'].each.with_index do |row, index|
@@ -30,11 +31,14 @@ File.open(asm_output, 'wb') do |asm|
   (0...25).each do |i|
     asm.puts ".word col_#{i}"
   end
+  asm.puts '_right_grid:'
+  asm.puts '.include "qr.inc"'
 end
 
 File.open(h_output, 'wb') do |h|
   h.puts <<~"H"
-  extern char * rows[25];
-  extern char * cols[25];
+  extern const char * rows[25];
+  extern const char * cols[25];
+  extern const char right_grid[25][25];
   H
 end
