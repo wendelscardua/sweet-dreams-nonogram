@@ -120,6 +120,8 @@ void main (void) {
 void draw_sprites (void) {
   oam_clear();
 
+  if (clean_view) return;
+
   oam_meta_spr(0x20 + 0x08 * cursor_column, 0x18 + 0x08 * cursor_row, (const unsigned char *)cursor_sprite);
 }
 
